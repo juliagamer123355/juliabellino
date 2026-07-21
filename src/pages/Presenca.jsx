@@ -11,10 +11,14 @@ const initialForm = {
   confirmado: "",
 };
 
+const LOCAL_STORAGE_KEY = "julia-casino-rsvp-enviado";
+
 export default function Presenca() {
   const [form, setForm] = useState(initialForm);
   const [foto, setFoto] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | sending | done | error
+  const [status, setStatus] = useState(() =>
+    localStorage.getItem(LOCAL_STORAGE_KEY) ? "already" : "idle",
+  ); // idle | sending | done | error | already
   const [errorMsg, setErrorMsg] = useState("");
 
   function updateField(field, value) {
@@ -53,8 +57,16 @@ export default function Presenca() {
         confirmado: form.confirmado,
         foto_path: fotoPath,
       });
-      if (insertError) throw insertError;
+      if (insertError) {
+        if (insertError.code === "23505") {
+          throw new Error(
+            "Esse telefone já confirmou presença antes. Se precisar mudar algo, fale direto com a gente.",
+          );
+        }
+        throw insertError;
+      }
 
+      localStorage.setItem(LOCAL_STORAGE_KEY, "1");
       setStatus("done");
       setForm(initialForm);
       setFoto(null);
@@ -81,7 +93,24 @@ export default function Presenca() {
           {EVENT.name.split(" ")[0]}.
         </p>
 
-        {status === "done" ? (
+        {status === "already" ? (
+          <div className="mt-12 rounded-xl border border-gold/25 bg-panel px-6 py-12 sm:px-8">
+            <SuitIcon suit="heart" className="mx-auto mb-4 h-8 w-8 text-gold" />
+            <h2 className="font-display text-2xl text-gold-light">
+              Você já confirmou presença!
+            </h2>
+            <p className="mt-3 text-xl text-cream/75">
+              Já recebemos sua confirmação por este aparelho. Nos vemos no Casino Night!
+            </p>
+            <button
+              type="button"
+              onClick={() => setStatus("idle")}
+              className="tracked-label mt-6 border-b border-gold pb-1 text-gold hover:text-gold-light"
+            >
+              Enviar outra confirmação
+            </button>
+          </div>
+        ) : status === "done" ? (
           <div className="mt-12 rounded-xl border border-gold/25 bg-panel px-6 py-12 sm:px-8">
             <SuitIcon suit="heart" className="mx-auto mb-4 h-8 w-8 text-gold" />
             <h2 className="font-display text-2xl text-gold-light">Presença registrada!</h2>
