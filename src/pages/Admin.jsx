@@ -141,16 +141,17 @@ function PartyPhotos({ password }) {
           {photos.map((photo) => (
             <div
               key={photo.path}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-gold/15"
+              className="relative aspect-square overflow-hidden rounded-lg border border-gold/15"
             >
               <img src={photo.url} alt="" className="h-full w-full object-cover" loading="lazy" />
               <button
                 type="button"
                 onClick={() => handleDelete(photo.path)}
                 disabled={deletingPath === photo.path}
-                className="absolute right-2 top-2 rounded bg-ink/80 px-2 py-1 text-sm text-cream opacity-0 transition-opacity hover:bg-burgundy group-hover:opacity-100 disabled:opacity-100"
+                aria-label="Apagar foto"
+                className="absolute right-2 top-2 rounded bg-ink/85 px-3 py-1.5 text-sm font-medium text-cream shadow-md transition-colors hover:bg-burgundy disabled:opacity-70"
               >
-                {deletingPath === photo.path ? "..." : "Apagar"}
+                {deletingPath === photo.path ? "..." : "✕ Apagar"}
               </button>
             </div>
           ))}
