@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SuitIcon from "../components/SuitIcon";
 import { supabase, supabaseEnabled } from "../lib/supabase";
 import { compressImage } from "../lib/imageCompression";
@@ -9,10 +9,40 @@ const CONFIRM_LABEL = {
   talvez: "Ainda não sabe",
 };
 
-function PhotoUploader() {
+const BUCKET = "fotos-festa";
+
+function PartyPhotos({ password }) {
+  const [photos, setPhotos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [result, setResult] = useState(null); // { ok, failed }
+  const [deletingPath, setDeletingPath] = useState(null);
+
+  const loadPhotos = useCallback(async () => {
+    if (!supabaseEnabled) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const { data, error } = await supabase.storage.from(BUCKET).list("", {
+      sortBy: { column: "created_at", order: "desc" },
+    });
+    if (!error && data) {
+      const list = data
+        .filter((f) => !f.name.startsWith("."))
+        .map((f) => ({
+          path: f.name,
+          url: supabase.storage.from(BUCKET).getPublicUrl(f.name).data.publicUrl,
+        }));
+      setPhotos(list);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadPhotos();
+  }, [loadPhotos]);
 
   async function handleFiles(e) {
     const files = Array.from(e.target.files || []);
@@ -29,7 +59,7 @@ function PhotoUploader() {
       try {
         const compressed = await compressImage(file, { maxDimension: 1920, quality: 0.78 });
         const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${compressed.name}`;
-        const { error } = await supabase.storage.from("fotos-festa").upload(path, compressed);
+        const { error } = await supabase.storage.from(BUCKET).upload(path, compressed);
         if (error) throw error;
         ok += 1;
       } catch (err) {
@@ -42,12 +72,32 @@ function PhotoUploader() {
     setResult({ ok, failed });
     setUploading(false);
     e.target.value = "";
+    loadPhotos();
+  }
+
+  async function handleDelete(path) {
+    if (!window.confirm("Apagar esta foto da galeria da festa? Não dá pra desfazer.")) return;
+    setDeletingPath(path);
+    try {
+      const res = await fetch("/api/admin-delete-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, path }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Erro ao apagar");
+      setPhotos((prev) => prev.filter((p) => p.path !== path));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingPath(null);
+    }
   }
 
   return (
     <div className="mt-12 rounded-xl border border-gold/15 bg-panel px-6 py-8 sm:px-8">
       <p className="tracked-label mb-2 text-gold">Depois da festa</p>
-      <h2 className="font-display text-2xl text-cream">Enviar fotos da festa</h2>
+      <h2 className="font-display text-2xl text-cream">Fotos da festa</h2>
       <p className="mt-2 max-w-lg text-cream/70">
         Selecione várias fotos de uma vez — elas são comprimidas automaticamente antes do
         envio para caber mais fotos no espaço grátis do Supabase, e aparecem na página{" "}
@@ -82,6 +132,30 @@ function PhotoUploader() {
       {!supabaseEnabled && (
         <p className="mt-4 text-sm text-red-400">Integração com Supabase não configurada.</p>
       )}
+
+      <div className="mt-8">
+        <p className="tracked-label mb-4 text-muted">
+          {loading ? "Carregando..." : `${photos.length} foto(s) publicadas`}
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {photos.map((photo) => (
+            <div
+              key={photo.path}
+              className="group relative aspect-square overflow-hidden rounded-lg border border-gold/15"
+            >
+              <img src={photo.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <button
+                type="button"
+                onClick={() => handleDelete(photo.path)}
+                disabled={deletingPath === photo.path}
+                className="absolute right-2 top-2 rounded bg-ink/80 px-2 py-1 text-sm text-cream opacity-0 transition-opacity hover:bg-burgundy group-hover:opacity-100 disabled:opacity-100"
+              >
+                {deletingPath === photo.path ? "..." : "Apagar"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -195,7 +269,7 @@ export default function Admin() {
           </table>
         </div>
 
-        <PhotoUploader />
+        <PartyPhotos password={password} />
       </div>
     </section>
   );
