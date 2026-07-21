@@ -17,7 +17,7 @@ alter table rsvps enable row level security;
 -- na rota /api/admin protegida por senha.
 create policy "Permitir insercao publica de rsvps"
   on rsvps for insert
-  to anon
+  to public
   with check (true);
 
 -- Bucket para fotos que os convidados anexam na confirmação (privado).
@@ -27,7 +27,7 @@ on conflict (id) do nothing;
 
 create policy "Permitir upload publico em fotos-presenca"
   on storage.objects for insert
-  to anon
+  to public
   with check (bucket_id = 'fotos-presenca');
 
 -- Bucket para as fotos da festa (público, liberado pela data no front-end).

@@ -11,7 +11,7 @@ export const EVENT = {
   venueAddress: "São José dos Pinhais, PR",
   venueDescription:
     "Florença Festas, em São José dos Pinhais, será o cenário desta noite inesquecível, cuidadosamente preparado para receber cada convidado com glamour.",
-  mapsUrl: "https://maps.google.com/?q=Floren%C3%A7a+Festas+S%C3%A3o+Jos%C3%A9+dos+Pinhais",
+  mapsUrl: "https://maps.app.goo.gl/fu55hZHjj2U9hWcs6",
 };
 
 // A partir de quando a página de Fotos fica liberada para os convidados.

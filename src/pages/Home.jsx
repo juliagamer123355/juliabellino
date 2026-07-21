@@ -5,6 +5,7 @@ import CountdownTimer from "../components/CountdownTimer";
 import { EVENT } from "../lib/config";
 import heroBg from "../assets/hero-bg.png";
 import profilePhoto from "../assets/profile-source.png";
+import fotoLocal from "../assets/fotoLocal.png";
 
 function SectionLabel({ children }) {
   return (
@@ -135,22 +136,27 @@ export default function Home() {
                 rel="noreferrer"
                 className="tracked-label mt-6 inline-block border-b border-gold pb-1 text-gold hover:text-gold-light"
               >
-                Endereço e mapa em breve
+                Ver endereço e mapa
               </a>
             </div>
-            <div className="relative flex min-h-[220px] items-center justify-center bg-burgundy/30">
-              <div
-                className="absolute inset-0 opacity-30"
-                style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(45deg, var(--color-gold) 0, var(--color-gold) 1px, transparent 1px, transparent 16px)",
-                }}
+            <a
+              href={EVENT.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group relative flex min-h-[220px] items-center justify-center overflow-hidden"
+              aria-label={`Abrir localização de ${EVENT.venue} no mapa`}
+            >
+              <img
+                src={fotoLocal}
+                alt={EVENT.venue}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="relative flex flex-col items-center gap-2 text-cream/70">
+              <div className="absolute inset-0 bg-ink/40 transition-colors group-hover:bg-ink/25" />
+              <div className="relative flex flex-col items-center gap-2 text-cream">
                 <SuitIcon suit="diamond" className="h-6 w-6 text-gold" />
-                <span className="tracked-label">Espaço para mapa</span>
+                <span className="tracked-label rounded bg-ink/60 px-3 py-1">Ver no mapa</span>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </section>
