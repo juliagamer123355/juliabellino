@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase, supabaseEnabled } from "../lib/supabase";
+import { compressImage } from "../lib/imageCompression";
 import { EVENT } from "../lib/config";
 import SuitIcon from "../components/SuitIcon";
 
@@ -36,10 +37,11 @@ export default function Presenca() {
 
       let fotoPath = null;
       if (foto) {
-        const path = `${Date.now()}-${foto.name}`;
+        const compressed = await compressImage(foto);
+        const path = `${Date.now()}-${compressed.name}`;
         const { error: uploadError } = await supabase.storage
           .from("fotos-presenca")
-          .upload(path, foto);
+          .upload(path, compressed);
         if (uploadError) throw uploadError;
         fotoPath = path;
       }

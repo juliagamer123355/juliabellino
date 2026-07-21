@@ -31,7 +31,12 @@ create policy "Permitir upload publico em fotos-presenca"
   with check (bucket_id = 'fotos-presenca');
 
 -- Bucket para as fotos da festa (público, liberado pela data no front-end).
--- Faça upload das fotos aqui pelo painel do Supabase depois da festa.
+-- O upload é feito pela página /admin (protegida por senha) depois da festa.
 insert into storage.buckets (id, name, public)
 values ('fotos-festa', 'fotos-festa', true)
 on conflict (id) do nothing;
+
+create policy "Permitir upload publico em fotos-festa"
+  on storage.objects for insert
+  to anon, authenticated
+  with check (bucket_id = 'fotos-festa');
