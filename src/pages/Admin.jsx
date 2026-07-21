@@ -199,6 +199,27 @@ export default function Admin() {
   const [errorMsg, setErrorMsg] = useState("");
   const [zippingGuests, setZippingGuests] = useState(false);
   const [guestZipProgress, setGuestZipProgress] = useState({ done: 0, total: 0 });
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  async function handleDeleteRsvp(id) {
+    setDeletingId(id);
+    try {
+      const res = await fetch("/api/admin-delete-rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password, id }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Erro ao apagar");
+      setRsvps((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setDeletingId(null);
+      setConfirmingId(null);
+    }
+  }
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -306,6 +327,7 @@ export default function Admin() {
                 <th className="px-4 py-3">Observação</th>
                 <th className="px-4 py-3">Presença</th>
                 <th className="px-4 py-3">Foto</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -329,11 +351,42 @@ export default function Admin() {
                       "—"
                     )}
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    {confirmingId === r.id ? (
+                      <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                        <span className="text-sm text-cream/70">Apagar {r.nome}?</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteRsvp(r.id)}
+                          disabled={deletingId === r.id}
+                          className="rounded bg-burgundy px-3 py-1.5 text-sm font-medium text-cream hover:bg-burgundy-light disabled:opacity-60"
+                        >
+                          {deletingId === r.id ? "..." : "Sim, apagar"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingId(null)}
+                          disabled={deletingId === r.id}
+                          className="rounded border border-gold/30 px-3 py-1.5 text-sm text-cream/80 hover:bg-white/5"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingId(r.id)}
+                        className="text-sm text-red-400 hover:text-red-300"
+                      >
+                        Apagar
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {rsvps.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-cream/60">
+                  <td colSpan={6} className="px-4 py-6 text-center text-cream/60">
                     Nenhuma confirmação ainda.
                   </td>
                 </tr>
