@@ -33,7 +33,7 @@ export default function Presenca() {
       return;
     }
     if (form.telefone && !isValidPhone(form.telefone)) {
-      setErrorMsg("Telefone incompleto. Use o padrão DDD + número, ex: 41 9 9644-2778.");
+      setErrorMsg("Telefone incompleto. Use o padrão DDD + número, ex: 41 9 1234-5678.");
       return;
     }
     setErrorMsg("");
@@ -150,7 +150,7 @@ export default function Presenca() {
                 value={form.telefone}
                 onChange={(e) => updateField("telefone", formatPhone(e.target.value))}
                 className="w-full rounded border border-gold/20 bg-ink px-4 py-3 text-lg text-cream outline-none focus:border-gold"
-                placeholder="41 9 9644-2778"
+                placeholder="41 9 1234-5678"
                 maxLength={16}
               />
             </div>

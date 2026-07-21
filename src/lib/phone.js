@@ -1,4 +1,4 @@
-// Formata progressivamente no padrão brasileiro: DDD + 9 + número, ex: "41 9 9644-2778".
+// Formata progressivamente no padrão brasileiro: DDD + 9 + número, ex: "41 9 1234-5678".
 export function formatPhone(raw) {
   const digits = raw.replace(/\D/g, "").slice(0, 11);
   if (!digits) return "";
