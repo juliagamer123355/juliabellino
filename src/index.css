@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", "Georgia", serif;
+  --font-body: "Cormorant Garamond", "Georgia", serif;
+
+  --color-ink: #0b0908;
+  --color-ink-2: #131010;
+  --color-panel: #1a1513;
+  --color-panel-2: #221b18;
+  --color-gold: #d9b968;
+  --color-gold-light: #ecd9a5;
+  --color-cream: #f1e9da;
+  --color-muted: #a99c8c;
+  --color-burgundy: #5c1229;
+  --color-burgundy-light: #7a1c37;
+  --color-felt: #16332c;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 18px;
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 19px;
+  }
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-serif);
+}
+
+.tracked-label {
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .tracked-label {
+    letter-spacing: 0.28em;
+  }
+}
+
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+.suit-icon {
+  color: var(--color-gold);
+  opacity: 0.15;
+}
