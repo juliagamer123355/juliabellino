@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.claude/
 
 # arquivos de referência do design, não fazem parte do site
 rascunhoFesta.png.png
