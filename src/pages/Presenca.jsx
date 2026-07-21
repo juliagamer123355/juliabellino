@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase, supabaseEnabled } from "../lib/supabase";
 import { compressImage } from "../lib/imageCompression";
+import { formatPhone, isValidPhone } from "../lib/phone";
 import { EVENT } from "../lib/config";
 import SuitIcon from "../components/SuitIcon";
 
@@ -29,6 +30,10 @@ export default function Presenca() {
     e.preventDefault();
     if (!form.nome || !form.confirmado) {
       setErrorMsg("Preencha nome e confirme sua presença.");
+      return;
+    }
+    if (form.telefone && !isValidPhone(form.telefone)) {
+      setErrorMsg("Telefone incompleto. Use o padrão DDD + número, ex: 41 9 9644-2778.");
       return;
     }
     setErrorMsg("");
@@ -141,10 +146,12 @@ export default function Presenca() {
               <label className="tracked-label mb-2 block text-muted">Telefone</label>
               <input
                 type="tel"
+                inputMode="numeric"
                 value={form.telefone}
-                onChange={(e) => updateField("telefone", e.target.value)}
+                onChange={(e) => updateField("telefone", formatPhone(e.target.value))}
                 className="w-full rounded border border-gold/20 bg-ink px-4 py-3 text-lg text-cream outline-none focus:border-gold"
-                placeholder="(00) 00000-0000"
+                placeholder="41 9 9644-2778"
+                maxLength={16}
               />
             </div>
 
