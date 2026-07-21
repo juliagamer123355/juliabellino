@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import SuitIcon from "../components/SuitIcon";
 import { supabase, supabaseEnabled } from "../lib/supabase";
 import { compressImage } from "../lib/imageCompression";
+import { downloadPhotosAsZip, exportRsvpsToCsv } from "../lib/exportUtils";
 
 const CONFIRM_LABEL = {
   sim: "Sim, estará lá",
@@ -18,6 +19,8 @@ function PartyPhotos({ password }) {
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [result, setResult] = useState(null); // { ok, failed }
   const [deletingPath, setDeletingPath] = useState(null);
+  const [zipping, setZipping] = useState(false);
+  const [zipProgress, setZipProgress] = useState({ done: 0, total: 0 });
 
   const loadPhotos = useCallback(async () => {
     if (!supabaseEnabled) {
@@ -73,6 +76,22 @@ function PartyPhotos({ password }) {
     setUploading(false);
     e.target.value = "";
     loadPhotos();
+  }
+
+  async function handleDownloadAll() {
+    setZipping(true);
+    setZipProgress({ done: 0, total: photos.length });
+    try {
+      await downloadPhotosAsZip(
+        photos.map((p) => ({ name: p.path, url: p.url })),
+        "fotos-da-festa.zip",
+        (done, total) => setZipProgress({ done, total }),
+      );
+    } catch (err) {
+      alert("Não foi possível gerar o zip: " + err.message);
+    } finally {
+      setZipping(false);
+    }
   }
 
   async function handleDelete(path) {
@@ -134,10 +153,22 @@ function PartyPhotos({ password }) {
       )}
 
       <div className="mt-8">
-        <p className="tracked-label mb-4 text-muted">
-          {loading ? "Carregando..." : `${photos.length} foto(s) publicadas`}
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="tracked-label text-muted">
+            {loading ? "Carregando..." : `${photos.length} foto(s) publicadas`}
+          </p>
+          {photos.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDownloadAll}
+              disabled={zipping}
+              className="tracked-label rounded border border-gold/40 px-4 py-2 text-gold hover:bg-gold/10 disabled:opacity-60"
+            >
+              {zipping ? `Baixando ${zipProgress.done}/${zipProgress.total}...` : "Baixar todas (.zip)"}
+            </button>
+          )}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {photos.map((photo) => (
             <div
               key={photo.path}
@@ -166,6 +197,8 @@ export default function Admin() {
   const [rsvps, setRsvps] = useState(null);
   const [status, setStatus] = useState("idle"); // idle | loading | error
   const [errorMsg, setErrorMsg] = useState("");
+  const [zippingGuests, setZippingGuests] = useState(false);
+  const [guestZipProgress, setGuestZipProgress] = useState({ done: 0, total: 0 });
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -216,6 +249,23 @@ export default function Admin() {
 
   const total = rsvps.length;
   const confirmados = rsvps.filter((r) => r.confirmado === "sim").length;
+  const rsvpsComFoto = rsvps.filter((r) => r.foto_url);
+
+  async function handleDownloadGuestPhotos() {
+    setZippingGuests(true);
+    setGuestZipProgress({ done: 0, total: rsvpsComFoto.length });
+    try {
+      await downloadPhotosAsZip(
+        rsvpsComFoto.map((r) => ({ name: r.nome, url: r.foto_url })),
+        "fotos-dos-convidados.zip",
+        (done, doneTotal) => setGuestZipProgress({ done, total: doneTotal }),
+      );
+    } catch (err) {
+      alert("Não foi possível gerar o zip: " + err.message);
+    } finally {
+      setZippingGuests(false);
+    }
+  }
 
   return (
     <section className="bg-ink px-6 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-10">
@@ -224,6 +274,28 @@ export default function Admin() {
         <p className="mt-2 text-lg text-cream/70">
           {confirmados} confirmados de {total} respostas
         </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => exportRsvpsToCsv(rsvps)}
+            className="tracked-label rounded bg-gold px-5 py-3 text-ink hover:opacity-90"
+          >
+            Baixar lista (.csv)
+          </button>
+          {rsvpsComFoto.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDownloadGuestPhotos}
+              disabled={zippingGuests}
+              className="tracked-label rounded border border-gold/40 px-5 py-3 text-gold hover:bg-gold/10 disabled:opacity-60"
+            >
+              {zippingGuests
+                ? `Baixando ${guestZipProgress.done}/${guestZipProgress.total}...`
+                : `Baixar fotos dos convidados (.zip)`}
+            </button>
+          )}
+        </div>
 
         <div className="mt-8 overflow-x-auto rounded-xl border border-gold/15">
           <table className="w-full min-w-[640px] text-left">
