@@ -40,3 +40,10 @@ create policy "Permitir upload publico em fotos-festa"
   on storage.objects for insert
   to anon, authenticated
   with check (bucket_id = 'fotos-festa');
+
+-- Bucket "público" só libera download direto por link; listar os
+-- arquivos (usado pela página /fotos) exige esta política à parte.
+create policy "Permitir listar fotos-festa publicamente"
+  on storage.objects for select
+  to anon, authenticated
+  using (bucket_id = 'fotos-festa');
