@@ -318,7 +318,71 @@ export default function Admin() {
           )}
         </div>
 
-        <div className="mt-8 overflow-x-auto rounded-xl border border-gold/15">
+        {/* Cartões — só no celular */}
+        <div className="mt-8 space-y-3 sm:hidden">
+          {rsvps.length === 0 && (
+            <p className="rounded-xl border border-gold/15 bg-panel px-4 py-6 text-center text-cream/60">
+              Nenhuma confirmação ainda.
+            </p>
+          )}
+          {rsvps.map((r) => (
+            <div key={r.id} className="rounded-xl border border-gold/15 bg-panel p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-display text-lg text-cream">{r.nome}</p>
+                  <p className="text-sm text-cream/60">{r.telefone || "Sem telefone"}</p>
+                </div>
+                <span className="tracked-label shrink-0 whitespace-nowrap rounded-full border border-gold/30 px-2 py-1 text-[0.6rem] text-gold-light">
+                  {CONFIRM_LABEL[r.confirmado] || r.confirmado}
+                </span>
+              </div>
+
+              {r.observacao && <p className="mt-2 text-sm text-cream/70">{r.observacao}</p>}
+
+              <div className="mt-3 flex items-center justify-between border-t border-gold/10 pt-3">
+                {r.foto_url ? (
+                  <a href={r.foto_url} target="_blank" rel="noreferrer" className="text-sm text-gold underline">
+                    Ver foto
+                  </a>
+                ) : (
+                  <span className="text-sm text-cream/40">Sem foto</span>
+                )}
+
+                {confirmingId === r.id ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRsvp(r.id)}
+                      disabled={deletingId === r.id}
+                      className="rounded bg-burgundy px-3 py-1.5 text-sm font-medium text-cream hover:bg-burgundy-light disabled:opacity-60"
+                    >
+                      {deletingId === r.id ? "..." : "Confirmar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingId(null)}
+                      disabled={deletingId === r.id}
+                      className="rounded border border-gold/30 px-3 py-1.5 text-sm text-cream/80"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingId(r.id)}
+                    className="text-sm text-red-400"
+                  >
+                    Apagar
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tabela — a partir de sm */}
+        <div className="mt-8 hidden overflow-x-auto rounded-xl border border-gold/15 sm:block">
           <table className="w-full min-w-[640px] text-left">
             <thead className="bg-panel text-muted">
               <tr className="tracked-label text-xs">
