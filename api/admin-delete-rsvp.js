@@ -1,4 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
+import { verifyAdminPassword } from "./_auth.js";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,13 +9,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { password, id } = req.body ?? {};
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    res.status(401).json({ error: "Senha incorreta" });
-    return;
-  }
+  if (!verifyAdminPassword(req, res)) return;
 
-  if (!id || typeof id !== "string") {
+  const { id } = req.body ?? {};
+  if (!id || typeof id !== "string" || !UUID_RE.test(id)) {
     res.status(400).json({ error: "Convidado inválido" });
     return;
   }

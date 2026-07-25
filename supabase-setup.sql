@@ -36,19 +36,39 @@ create policy "Permitir upload publico em fotos-presenca"
   with check (bucket_id = 'fotos-presenca');
 
 -- Bucket para as fotos da festa (público, liberado pela data no front-end).
--- O upload é feito pela página /admin (protegida por senha) depois da festa.
+-- O upload é feito pelo servidor (chave service_role) via /api/admin-upload-photo,
+-- protegida por senha — não existe política pública de insert aqui de propósito,
+-- senão qualquer pessoa com a anon key (que fica visível no bundle do site)
+-- conseguiria subir arquivos direto pela API do Supabase, pulando a senha do /admin.
 insert into storage.buckets (id, name, public)
 values ('fotos-festa', 'fotos-festa', true)
 on conflict (id) do nothing;
 
-create policy "Permitir upload publico em fotos-festa"
-  on storage.objects for insert
-  to anon, authenticated
-  with check (bucket_id = 'fotos-festa');
-
 -- Bucket "público" só libera download direto por link; listar os
--- arquivos (usado pela página /fotos) exige esta política à parte.
+-- arquivos (usado pela página /fotos e pelo /admin) exige esta política à parte.
 create policy "Permitir listar fotos-festa publicamente"
   on storage.objects for select
   to anon, authenticated
   using (bucket_id = 'fotos-festa');
+
+-- Limites de tamanho e tipo nos buckets — defesa extra caso alguém chame a
+-- API do Supabase diretamente (fora do site).
+update storage.buckets
+set file_size_limit = 10485760,
+    allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+where id in ('fotos-presenca', 'fotos-festa');
+
+-- Limites de tamanho nos campos de texto do RSVP — defesa extra contra
+-- alguém enviando dados enormes direto pela API, sem passar pelo formulário.
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'rsvps_nome_length') then
+    alter table rsvps add constraint rsvps_nome_length check (char_length(nome) <= 200);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'rsvps_observacao_length') then
+    alter table rsvps add constraint rsvps_observacao_length check (observacao is null or char_length(observacao) <= 1000);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'rsvps_telefone_length') then
+    alter table rsvps add constraint rsvps_telefone_length check (telefone is null or char_length(telefone) <= 20);
+  end if;
+end $$;

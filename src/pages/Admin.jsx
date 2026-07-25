@@ -12,6 +12,15 @@ const CONFIRM_LABEL = {
 
 const BUCKET = "fotos-festa";
 
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 function PartyPhotos({ password }) {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,9 +70,19 @@ function PartyPhotos({ password }) {
     for (const file of files) {
       try {
         const compressed = await compressImage(file, { maxDimension: 1920, quality: 0.78 });
-        const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${compressed.name}`;
-        const { error } = await supabase.storage.from(BUCKET).upload(path, compressed);
-        if (error) throw error;
+        const base64 = await blobToBase64(compressed);
+        const res = await fetch("/api/admin-upload-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            password,
+            filename: compressed.name,
+            contentType: compressed.type,
+            data: base64,
+          }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error || "Erro ao enviar");
         ok += 1;
       } catch (err) {
         console.error(err);

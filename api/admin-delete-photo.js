@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { verifyAdminPassword } from "./_auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,13 +7,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { password, path } = req.body ?? {};
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    res.status(401).json({ error: "Senha incorreta" });
-    return;
-  }
+  if (!verifyAdminPassword(req, res)) return;
 
-  if (!path || typeof path !== "string") {
+  const { path } = req.body ?? {};
+  if (!path || typeof path !== "string" || path.includes("..") || path.startsWith("/")) {
     res.status(400).json({ error: "Foto inválida" });
     return;
   }

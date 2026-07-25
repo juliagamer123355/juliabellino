@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { verifyAdminPassword } from "./_auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,11 +7,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { password } = req.body ?? {};
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    res.status(401).json({ error: "Senha incorreta" });
-    return;
-  }
+  if (!verifyAdminPassword(req, res)) return;
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
