@@ -14,6 +14,5 @@ export const EVENT = {
   mapsUrl: "https://maps.app.goo.gl/fu55hZHjj2U9hWcs6",
 };
 
-// A partir de quando a página de Fotos fica liberada para os convidados.
-// TODO: temporariamente liberada pra testar — voltar para "2026-12-12T00:00:00-03:00" antes da festa.
-export const PHOTOS_UNLOCK_DATE = "2020-01-01T00:00:00-03:00";
+// A partir de quando a página de Fotos fica liberada para os convidados (1 dia após a festa).
+export const PHOTOS_UNLOCK_DATE = "2026-12-12T00:00:00-03:00";
