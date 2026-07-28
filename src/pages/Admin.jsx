@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import SuitIcon from "../components/SuitIcon";
 import { supabase, supabaseEnabled } from "../lib/supabase";
-import { compressImage } from "../lib/imageCompression";
+import { blobToBase64, compressImage } from "../lib/imageCompression";
 import { downloadPhotosAsZip, exportRsvpsToCsv } from "../lib/exportUtils";
 
 const CONFIRM_LABEL = {
@@ -11,15 +11,6 @@ const CONFIRM_LABEL = {
 };
 
 const BUCKET = "fotos-festa";
-
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
-    reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
-    reader.readAsDataURL(blob);
-  });
-}
 
 function PartyPhotos({ password }) {
   const [photos, setPhotos] = useState([]);

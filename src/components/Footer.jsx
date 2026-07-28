@@ -8,6 +8,9 @@ export default function Footer() {
         © {EVENT.name} • {EVENT.theme} • {EVENT.age} Anos
         <SuitIcon suit="spade" className="h-3 w-3 shrink-0 text-gold" />
       </p>
+      <p className="tracked-label mt-3 text-[0.6rem] text-muted/60 sm:text-xs">
+        Powered by Stratum OT
+      </p>
     </footer>
   );
 }

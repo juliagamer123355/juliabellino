@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { supabase, supabaseEnabled } from "../lib/supabase";
-import { compressImage } from "../lib/imageCompression";
+import { blobToBase64, compressImage } from "../lib/imageCompression";
 import { formatPhone, isValidPhone } from "../lib/phone";
 import { EVENT } from "../lib/config";
 import SuitIcon from "../components/SuitIcon";
@@ -40,36 +39,26 @@ export default function Presenca() {
     setStatus("sending");
 
     try {
-      if (!supabaseEnabled) {
-        throw new Error("Integração com Supabase ainda não configurada.");
-      }
-
-      let fotoPath = null;
+      let photo = null;
       if (foto) {
         const compressed = await compressImage(foto);
-        const path = `${Date.now()}-${compressed.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("fotos-presenca")
-          .upload(path, compressed);
-        if (uploadError) throw uploadError;
-        fotoPath = path;
+        const data = await blobToBase64(compressed);
+        photo = { filename: compressed.name, contentType: compressed.type, data };
       }
 
-      const { error: insertError } = await supabase.from("rsvps").insert({
-        nome: form.nome,
-        telefone: form.telefone,
-        observacao: form.observacao,
-        confirmado: form.confirmado,
-        foto_path: fotoPath,
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: form.nome,
+          telefone: form.telefone,
+          observacao: form.observacao,
+          confirmado: form.confirmado,
+          photo,
+        }),
       });
-      if (insertError) {
-        if (insertError.code === "23505") {
-          throw new Error(
-            "Esse telefone já confirmou presença antes. Se precisar mudar algo, fale direto com a gente.",
-          );
-        }
-        throw insertError;
-      }
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Não foi possível enviar. Tente novamente.");
 
       localStorage.setItem(LOCAL_STORAGE_KEY, "1");
       setStatus("done");

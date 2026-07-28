@@ -17,23 +17,18 @@ create unique index if not exists rsvps_telefone_unique
 
 alter table rsvps enable row level security;
 
--- Qualquer visitante pode enviar uma confirmação (insert), mas ninguém consegue
--- ler a tabela pelo navegador — só o servidor (chave service_role) lê os dados,
--- na rota /api/admin protegida por senha.
-create policy "Permitir insercao publica de rsvps"
-  on rsvps for insert
-  to public
-  with check (true);
+-- Nenhuma política de insert/select pública aqui de propósito: o envio do
+-- formulário de RSVP passa por /api/rsvp (chave service_role, com validação
+-- e rate limit no servidor), e a leitura da lista de convidados passa por
+-- /api/admin (protegida por senha). O navegador nunca fala direto com esta
+-- tabela.
 
 -- Bucket para fotos que os convidados anexam na confirmação (privado).
+-- O upload também é feito pelo servidor via /api/rsvp — sem política pública
+-- de insert, para não permitir envio direto pela API do Supabase fora do site.
 insert into storage.buckets (id, name, public)
 values ('fotos-presenca', 'fotos-presenca', false)
 on conflict (id) do nothing;
-
-create policy "Permitir upload publico em fotos-presenca"
-  on storage.objects for insert
-  to public
-  with check (bucket_id = 'fotos-presenca');
 
 -- Bucket para as fotos da festa (público, liberado pela data no front-end).
 -- O upload é feito pelo servidor (chave service_role) via /api/admin-upload-photo,
@@ -70,5 +65,8 @@ begin
   end if;
   if not exists (select 1 from pg_constraint where conname = 'rsvps_telefone_length') then
     alter table rsvps add constraint rsvps_telefone_length check (telefone is null or char_length(telefone) <= 20);
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'rsvps_telefone_format') then
+    alter table rsvps add constraint rsvps_telefone_format check (telefone is null or telefone ~ '^[0-9]{2} 9 [0-9]{4}-[0-9]{4}$');
   end if;
 end $$;

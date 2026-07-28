@@ -40,3 +40,13 @@ export function compressImage(file, { maxDimension = 1600, quality = 0.75 } = {}
     img.src = objectUrl;
   });
 }
+
+// Converte um Blob/File em base64 puro (sem o prefixo "data:...;base64,").
+export function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+    reader.readAsDataURL(blob);
+  });
+}
