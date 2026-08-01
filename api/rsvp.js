@@ -30,6 +30,7 @@ export default async function handler(req, res) {
   const telefone = typeof body.telefone === "string" ? body.telefone.trim() : "";
   const observacao = typeof body.observacao === "string" ? body.observacao.trim() : "";
   const confirmado = typeof body.confirmado === "string" ? body.confirmado : "";
+  const bebe = typeof body.bebe === "boolean" ? body.bebe : null;
   const photo = body.photo;
 
   if (!nome || nome.length > 200) {
@@ -102,6 +103,7 @@ export default async function handler(req, res) {
     observacao: observacao || null,
     confirmado,
     foto_path: fotoPath,
+    bebe,
   });
 
   if (insertError) {

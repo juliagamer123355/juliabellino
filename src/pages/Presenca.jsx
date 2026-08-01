@@ -9,6 +9,7 @@ const initialForm = {
   telefone: "",
   observacao: "",
   confirmado: "",
+  bebe: "",
 };
 
 const LOCAL_STORAGE_KEY = "julia-casino-rsvp-enviado";
@@ -54,6 +55,7 @@ export default function Presenca() {
           telefone: form.telefone,
           observacao: form.observacao,
           confirmado: form.confirmado,
+          bebe: form.bebe === "" ? null : form.bebe === "sim",
           photo,
         }),
       });
@@ -186,6 +188,19 @@ export default function Presenca() {
                 <option value="sim">Sim, estarei lá!</option>
                 <option value="nao">Não poderei ir</option>
                 <option value="talvez">Ainda não sei</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="tracked-label mb-2 block text-muted">Vai beber?</label>
+              <select
+                value={form.bebe}
+                onChange={(e) => updateField("bebe", e.target.value)}
+                className="w-full rounded border border-gold/20 bg-ink px-4 py-3 text-lg text-cream outline-none focus:border-gold"
+              >
+                <option value="">Prefiro não dizer</option>
+                <option value="sim">Sim, bebo</option>
+                <option value="nao">Não bebo</option>
               </select>
             </div>
 

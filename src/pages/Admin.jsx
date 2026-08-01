@@ -10,6 +10,12 @@ const CONFIRM_LABEL = {
   talvez: "Ainda não sabe",
 };
 
+function bebeLabel(bebe) {
+  if (bebe === true) return "Bebe";
+  if (bebe === false) return "Não bebe";
+  return "Não informou";
+}
+
 const BUCKET = "fotos-festa";
 
 function PartyPhotos({ password }) {
@@ -348,6 +354,7 @@ export default function Admin() {
               </div>
 
               {r.observacao && <p className="mt-2 text-sm text-cream/70">{r.observacao}</p>}
+              <p className="mt-1 text-sm text-cream/60">{bebeLabel(r.bebe)}</p>
 
               <div className="mt-3 flex items-center justify-between border-t border-gold/10 pt-3">
                 {r.foto_url ? (
@@ -400,6 +407,7 @@ export default function Admin() {
                 <th className="px-4 py-3">Telefone</th>
                 <th className="px-4 py-3">Observação</th>
                 <th className="px-4 py-3">Presença</th>
+                <th className="px-4 py-3">Bebe</th>
                 <th className="px-4 py-3">Foto</th>
                 <th className="px-4 py-3"></th>
               </tr>
@@ -411,6 +419,7 @@ export default function Admin() {
                   <td className="px-4 py-3">{r.telefone || "—"}</td>
                   <td className="px-4 py-3">{r.observacao || "—"}</td>
                   <td className="px-4 py-3">{CONFIRM_LABEL[r.confirmado] || r.confirmado}</td>
+                  <td className="px-4 py-3">{bebeLabel(r.bebe)}</td>
                   <td className="px-4 py-3">
                     {r.foto_url ? (
                       <a
@@ -460,7 +469,7 @@ export default function Admin() {
               ))}
               {rsvps.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-cream/60">
+                  <td colSpan={7} className="px-4 py-6 text-center text-cream/60">
                     Nenhuma confirmação ainda.
                   </td>
                 </tr>

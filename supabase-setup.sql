@@ -7,7 +7,8 @@ create table if not exists rsvps (
   telefone text,
   observacao text,
   confirmado text not null check (confirmado in ('sim', 'nao', 'talvez')),
-  foto_path text
+  foto_path text,
+  bebe boolean
 );
 
 -- Impede duas confirmações de presença com o mesmo telefone.

@@ -15,13 +15,20 @@ const CONFIRM_LABEL = {
   talvez: "Ainda não sabe",
 };
 
+function bebeLabel(bebe) {
+  if (bebe === true) return "Sim";
+  if (bebe === false) return "Não";
+  return "Não informou";
+}
+
 export function exportRsvpsToCsv(rsvps, filename = "convidados.csv") {
-  const header = ["Nome", "Telefone", "Observação", "Presença", "Enviou foto", "Data"];
+  const header = ["Nome", "Telefone", "Observação", "Presença", "Bebe", "Enviou foto", "Data"];
   const rows = rsvps.map((r) => [
     r.nome,
     r.telefone || "",
     r.observacao || "",
     CONFIRM_LABEL[r.confirmado] || r.confirmado,
+    bebeLabel(r.bebe),
     r.foto_url ? "Sim" : "Não",
     new Date(r.created_at).toLocaleString("pt-BR"),
   ]);
