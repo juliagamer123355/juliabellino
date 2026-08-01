@@ -17,6 +17,9 @@ dist-ssr
 rascunhoFesta.png.png
 gabarito.txt
 
+# scripts/migrações do banco (Supabase) — rodados manualmente, não vão pro git
+supabase-*.sql
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
