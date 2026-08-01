@@ -193,6 +193,7 @@ function PartyPhotos({ password }) {
               <img src={photo.url} alt="" className="h-full w-full object-cover" loading="lazy" />
               <button
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleDelete(photo.path)}
                 disabled={deletingPath === photo.path}
                 aria-label="Apagar foto"
@@ -369,6 +370,7 @@ export default function Admin() {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handleDeleteRsvp(r.id)}
                       disabled={deletingId === r.id}
                       className="rounded bg-burgundy px-3 py-1.5 text-sm font-medium text-cream hover:bg-burgundy-light disabled:opacity-60"
@@ -377,6 +379,7 @@ export default function Admin() {
                     </button>
                     <button
                       type="button"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setConfirmingId(null)}
                       disabled={deletingId === r.id}
                       className="rounded border border-gold/30 px-3 py-1.5 text-sm text-cream/80"
@@ -436,10 +439,11 @@ export default function Admin() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     {confirmingId === r.id ? (
-                      <div className="flex items-center justify-end gap-2 whitespace-nowrap">
-                        <span className="text-sm text-cream/70">Apagar {r.nome}?</span>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <span className="text-sm text-cream/70">Tem certeza?</span>
                         <button
                           type="button"
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => handleDeleteRsvp(r.id)}
                           disabled={deletingId === r.id}
                           className="rounded bg-burgundy px-3 py-1.5 text-sm font-medium text-cream hover:bg-burgundy-light disabled:opacity-60"
@@ -448,6 +452,7 @@ export default function Admin() {
                         </button>
                         <button
                           type="button"
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => setConfirmingId(null)}
                           disabled={deletingId === r.id}
                           className="rounded border border-gold/30 px-3 py-1.5 text-sm text-cream/80 hover:bg-white/5"
